@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoticon - Your AI Emotional Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: radial-gradient(circle at 20% 80%, #0a0a0a 0%, #1a1a2e 40%, #16213e 100%);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+            opacity: 0.7;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 15px 40px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            width: 98%;
+            max-width: 1100px;
+            box-shadow: none;
+        }
+
+        nav:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(255, 64, 129, 0.3);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff4081;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+            width: auto;
+            height: auto;
+            border-radius: 0;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 45px;
+            align-items: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 12px 28px;
+            border-radius: 25px;
+            background: transparent;
+            min-width: 110px;
+            text-align: center;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 64, 129, 0.2);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff4081, #64b5f6);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 20px auto;
+            padding: 20px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-top: 100px;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 64, 129, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+        
+        .panel:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) scale(1.1);
+        }
+        
+        .panel:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 64, 129, 0.2);
+            border-color: rgba(255, 64, 129, 0.3);
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .panel-title i {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #videoFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            min-width: 140px;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            color: #000;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 64, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 64, 129, 0.5);
+            color: #fff;
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 64, 129, 0.1);
+            border-color: rgba(255, 64, 129, 0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 64, 129, 0.2);
+        }
+
+        .btn-sm {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 400px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            animation: fadeIn 0.3s ease;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .message.user {
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            color: #000;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.ai {
+            background: rgba(255, 255, 255, 0.15);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            color: #fff;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 50px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid #64b5f6;
+        }
+
+        .chat-input button {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            border: none;
+            background: #ff4081;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.05);
+            background: #e91e63;
+            box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            font-style: italic;
+            opacity: 0.7;
+            color: #64b5f6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px 20px;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 10;
+        }
+        
+        footer p {
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 900px) {
+            nav {
+                max-width: 98vw;
+                padding: 10px 8px;
+            }
+            .nav-links {
+                gap: 18px;
+            }
+            nav a, .btn {
+                min-width: 80px;
+                padding: 10px 10px;
+                font-size: 1rem;
+            }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #64b5f6, #1976d2);
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+        
+        .camera-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 10, 20, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 0.3s;
+        }
+        .modal[aria-hidden="true"] {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-content {
+            background: rgba(30, 30, 50, 0.98);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+            max-width: 400px;
+            width: 90vw;
+            color: #fff;
+            text-align: center;
+            position: relative;
+            animation: modalIn 0.4s cubic-bezier(.4,2,.6,1) both;
+        }
+        @keyframes modalIn {
+            0% { transform: scale(0.9) translateY(40px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 18px;
+            color: #ff4081;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        .modal-text ul {
+            text-align: left;
+            margin: 18px 0 10px 0;
+            padding-left: 20px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        @media (max-width: 600px) {
+            .modal-content { padding: 25px 10px; }
+            .modal-title { font-size: 1.3rem; }
+        }
+
+        /* Nav bar fix: add margin to .container to prevent overlap */
+        .container { margin-top: 110px; }
+        @media (max-width: 768px) { .container { margin-top: 80px; } }
+
+        /* Improved Chat Section Styles */
+        #chat-container {
+            background: rgba(255,255,255,0.10);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.18);
+            border: 1.5px solid rgba(255,255,255,0.18);
+            padding: 32px 28px 22px 28px;
+            margin: 0 auto;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+        #chatMessages {
+            background: rgba(0,0,0,0.20);
+            border-radius: 18px;
+            min-height: 220px;
+            max-height: 340px;
+            overflow-y: auto;
+            padding: 20px 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: background 0.2s;
+            scroll-behavior: smooth;
+        }
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-bottom: 2px;
+            position: relative;
+            max-width: 90%;
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .message.ai {
+            align-self: flex-start;
+        }
+        .message-bubble {
+            padding: 13px 20px;
+            border-radius: 20px 20px 6px 20px;
+            font-size: 1.08rem;
+            word-break: break-word;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            position: relative;
+            background: linear-gradient(120deg, #ff4081 0%, #64b5f6 100%);
+            color: #000;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .message.user .message-bubble {
+            background: linear-gradient(120deg, #ff4081 0%, #64b5f6 100%);
+            color: #000;
+            border-bottom-right-radius: 8px;
+            border-bottom-left-radius: 20px;
+            box-shadow: 0 4px 16px rgba(255,64,129,0.2);
+        }
+        .message.ai .message-bubble {
+            background: linear-gradient(120deg, #23234a 0%, #3a3a6a 100%);
+            color: #fff;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 16px rgba(100,181,246,0.2);
+        }
+        .message.user .message-bubble::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            bottom: 0;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(120deg, #ff4081 0%, #64b5f6 100%);
+            clip-path: polygon(0 0, 100% 100%, 100% 0);
+            border-bottom-right-radius: 4px;
+        }
+        .message.ai .message-bubble::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            bottom: 0;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(120deg, #23234a 0%, #3a3a6a 100%);
+            clip-path: polygon(100% 0, 0 100%, 0 0);
+            border-bottom-left-radius: 4px;
+        }
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            margin-bottom: 2px;
+            flex-shrink: 0;
+        }
+        .message.user .message-avatar {
+            background: linear-gradient(120deg, #ff4081 0%, #64b5f6 100%);
+            color: #fff;
+        }
+        .message.ai .message-avatar {
+            background: linear-gradient(120deg, #23234a 0%, #3a3a6a 100%);
+            color: #ff4081;
+        }
+        .message-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+            color: rgba(255,255,255,0.8);
+            margin-left: 8px;
+            margin-right: 8px;
+        }
+        #chat-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        #messageInput {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 25px;
+            border: none;
+            background: rgba(255,255,255,0.13);
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Exo 2', sans-serif;
+            transition: background 0.2s, border 0.2s;
+        }
+        #messageInput:focus {
+            outline: none;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid #64b5f6;
+        }
+        #sendBtn {
+            padding: 13px 26px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(45deg, #ff4081, #64b5f6);
+            color: #000;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(255,64,129,0.08);
+        }
+        #sendBtn:hover {
+            background: linear-gradient(45deg, #64b5f6, #ff4081);
+            transform: translateY(-2px) scale(1.04);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            justify-content: center;
+            padding: 8px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .toggle-label {
+            font-size: 0.9rem;
+            color: #64b5f6;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc;
+            transition: background 0.3s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background: #fff;
+            transition: transform 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(100,181,246,0.15);
+        }
+        .switch input:checked + .slider {
+            background: linear-gradient(90deg, #64b5f6 0%, #ff4081 100%);
+        }
+        .switch input:checked + .slider:before {
+            transform: translateX(22px);
+            background: #fff;
+        }
+        .slider:active:before {
+            width: 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Consent Modal -->
+    <div class="modal" id="consentModal" aria-modal="true" role="dialog" aria-labelledby="consentTitle" aria-describedby="consentDesc">
+        <div class="modal-content">
+            <h2 class="modal-title" id="consentTitle"><i class="fas fa-shield-alt"></i> Privacy & Consent</h2>
+            <div class="modal-text" id="consentDesc">
+                <p>Welcome to Emoticon! We value your privacy and want you to understand how we use your camera:</p>
+                <ul>
+                    <li>Your camera is used <strong>only for emotion detection</strong> in real-time</li>
+                    <li>All processing happens <strong>directly in your browser</strong></li>
+                    <li><strong>No images or video</strong> are stored or sent to any server</li>
+                    <li><strong>No personal data</strong> is collected without your explicit consent</li>
+                    <li>You can turn off camera access at any time</li>
+                </ul>
+                <p>By clicking "Agree", you consent to using your camera for emotion analysis during your session.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="declineBtn">Decline</button>
+                <button class="btn" id="agreeBtn">Agree & Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>EMOTICON</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{% url 'myapp:dashboard' %}" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="{% url 'myapp:journal' %}"><i class="fas fa-book"></i> Journal</a></li>
+                <li><a href="{% url 'myapp:profile' %}"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="{% url 'myapp:logout' %}" class="active"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <!-- Welcome Message -->
+            <div class="welcome-message" style="grid-column: 1 / -1; text-align: center; margin-bottom: 20px;">
+                <h2>Hello, {{ user.username }}!</h2>
+            </div>
+
+            <!-- Left Column -->
+            <div class="left-column">
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fas fa-camera"></i> Mood Detection</h2>
+                    <div id="dominant-emotion-display" style="font-size:2rem; color:#ff4081; text-align:center; margin-bottom:10px;"></div>
+                    <div id="mood-status" style="text-align:center; margin-bottom:12px; font-size:1.2rem; font-weight:600; color:#ff4081; min-height:28px;">
+                        <!-- Mood status and face detection message will appear here -->
+                        <span id="face-status">No face detected</span>
+                        <span id="current-mood" style="margin-left:18px;"></span>
+                    </div>
+                    <div class="camera-container">
+                        <div class="camera-placeholder" id="cameraPlaceholder">
+                            <div class="spinner"></div>
+                            <p>Click "Start Camera" to begin emotion detection</p>
+                        </div>
+                        <img id="videoFeed" class="camera-feed" style="display: none;">
+                        <div class="camera-overlay">
+                            <div class="face-mesh"></div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button id="startBtn" class="btn">
+                            <i class="fas fa-play"></i> Start Camera
+                        </button>
+                        <button id="stopBtn" class="btn btn-secondary">
+                            <i class="fas fa-stop"></i> Stop Camera
+                        </button>
+                        
+                        
+                    </div>
+                    
+                </div>
+            </div> 
+
+            
+            <div class="right-column">
+               
+<div class="panel">
+    <h2 class="panel-title"><i class="fas fa-comments"></i> AI Companion</h2>
+
+    <!-- Conversation Insights Panel -->
+    <div id="conversation-insights" style="margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); display: none;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <i class="fas fa-brain" style="color: #64b5f6;"></i>
+            <span style="font-size: 0.9rem; color: #64b5f6; font-weight: 600;">Conversation Memory Active</span>
+        </div>
+        <div id="insights-content" style="font-size: 0.8rem; color: rgba(255,255,255,0.8);">
+            <div id="topics-display"></div>
+            <div id="context-indicator"></div>
+        </div>
+    </div>
+
+    <div id="chat-container">
+    <div id="chatMessages">
+        {% for message in messages %}
+            <div class="message {{ message.user.username|yesno:'user,ai' }}">
+                <span class="message-avatar">
+                    {% if message.user.username == username %}
+                        <i class="fas fa-user"></i>
+                    {% else %}
+                        <i class="fas fa-robot"></i>
+                    {% endif %}
+                </span>
+                <span class="message-bubble">
+                    <b>{{ message.user.username }}:</b> {{ message.message_text }}
+                </span>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="typingIndicator" class="typing-indicator" style="display:none;">AI is typing...</div>
+    
+    <!-- Enhanced Features Panel -->
+    <div id="enhanced-features" style="margin: 10px 0; padding: 8px; background: rgba(76,175,80,0.1); border-radius: 8px; border: 1px solid rgba(76,175,80,0.3); display: none;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+            <i class="fas fa-rocket" style="color: #4caf50;"></i>
+            <span style="font-size: 0.8rem; color: #4caf50; font-weight: 600;">Enhanced AI Features</span>
+        </div>
+        <div id="features-content" style="font-size: 0.75rem; color: rgba(255,255,255,0.8);">
+            <div id="search-indicator"></div>
+            <div id="learning-indicator"></div>
+        </div>
+    </div>
+    
+    <!-- Feedback Panel -->
+    <div id="feedback-panel" style="margin: 10px 0; padding: 8px; background: rgba(255,193,7,0.1); border-radius: 8px; border: 1px solid rgba(255,193,7,0.3); display: none;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+            <i class="fas fa-thumbs-up" style="color: #ffc107;"></i>
+            <span style="font-size: 0.8rem; color: #ffc107; font-weight: 600;">Help AI Learn</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button id="feedback-good" class="feedback-btn" style="background: rgba(76,175,80,0.2); border: 1px solid rgba(76,175,80,0.5); color: #4caf50; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer;">
+                <i class="fas fa-thumbs-up"></i> Helpful
+            </button>
+            <button id="feedback-bad" class="feedback-btn" style="background: rgba(244,67,54,0.2); border: 1px solid rgba(244,67,54,0.5); color: #f44336; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer;">
+                <i class="fas fa-thumbs-down"></i> Not Helpful
+            </button>
+        </div>
+    </div>
+    
+    <form id="chat-form" method="post" action="{% url 'myapp:chatbot_api' %}">
+        {% csrf_token %}
+        <div style="position: relative;">
+            <input type="text" name="message" id="messageInput" placeholder="Type your message..." autocomplete="off" required>
+            <div id="memory-indicator" style="position: absolute; right: 70px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: #64b5f6; opacity: 0; transition: opacity 0.3s;">
+                <i class="fas fa-brain"></i>
+            </div>
+        </div>
+        <button type="submit" id="sendBtn">Send</button>
+    </form>
+    
+    <!-- Internet Search Toggle moved to bottom -->
+    <div class="toggle-row">
+      <span class="toggle-label">
+        <i class="fas fa-search"></i> Enable Internet Search
+      </span>
+      <label class="switch">
+        <input type="checkbox" id="internetSearchToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+</div>
+</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Emoticon Project &copy; 2025 | AI Emotional Companion for Mental Wellness</p>
+            <p>Made with ❤️ </p>
+        </footer>
+    </div>
+
+    <script type="text/javascript">
+        
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const consentModal = document.getElementById('consentModal');
+        const agreeBtn = document.getElementById('agreeBtn');
+        const declineBtn = document.getElementById('declineBtn');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const videoFeed = document.getElementById('videoFeed'); // Added for the new video feed image
+        let currentMood = 'neutral';
+        let isCameraOn = false;
+        let detectionActive = false;
+        let chatHistory = []; 
+        let moodPollInterval = null;
+        let latestDetectedMood = 'neutral';
+        let useInternetSearch = true;
+        // Show consent modal on load
+        consentModal.style.display = 'flex';
+
+        // Consent actions
+        agreeBtn.addEventListener('click', () => {
+            consentModal.style.display = 'none';
+            cameraPlaceholder.innerHTML = '<div class="spinner"></div><p>Click "Start Camera" to begin</p>';
+        });
+
+        declineBtn.addEventListener('click', () => {
+            consentModal.style.display = 'none';
+            cameraPlaceholder.innerHTML = '<p>Camera access declined. You can enable it later in settings.</p>';
+        });
+
+        function init() { // Simplified init
+            // Set up event listeners
+            startBtn.addEventListener('click', startCamera);
+            stopBtn.addEventListener('click', stopCamera);
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            // Add event listener for the toggle
+            const internetSearchToggle = document.getElementById('internetSearchToggle');
+            internetSearchToggle.addEventListener('change', function() {
+                useInternetSearch = this.checked;
+            });
+        }
+
+        // Modified startCamera function
+        function startCamera() {
+            if (isCameraOn) return;
+            
+            // Hide placeholder and show video feed
+            cameraPlaceholder.style.display = 'none';
+            videoFeed.style.display = 'block';
+            
+            // Set video feed source - Using Flask's url_for
+            videoFeed.src = "{% url 'myapp:video_feed' %}";
+            
+            isCameraOn = true;
+            detectionActive = true;
+            // The video feed is now directly handled by the img tag's src
+            console.log('Camera started successfully');
+            // Start polling
+            if (!moodPollInterval) {
+                pollMoodStatus(); // Optionally poll immediately
+                moodPollInterval = setInterval(pollMoodStatus, 1000);
+            }
+        }
+
+        // Modified stopCamera function
+        function stopCamera() {
+            if (!isCameraOn) return;
+
+            isCameraOn = false;
+            detectionActive = false;
+
+            videoFeed.src = ''; // Stop the stream
+            videoFeed.style.display = 'none'; // Hide the video feed
+            cameraPlaceholder.style.display = 'flex'; // Show the placeholder
+            cameraPlaceholder.innerHTML = '<p>Camera stopped. Click "Start Camera" to begin again.</p>'; // Update placeholder text
+            console.log('Camera stopped');
+            // Stop polling
+            if (moodPollInterval) {
+                clearInterval(moodPollInterval);
+                moodPollInterval = null;
+            }
+        }
+    // CSRF Token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+         // Add message to chat with enhanced display
+    function addMessage(text, sender, timestamp = null, isContextual = false, emotion = null) {
+        const now = timestamp ? new Date(timestamp) : new Date();
+        const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+        const messageEl = document.createElement('div');
+        messageEl.classList.add('message', sender);
+        
+        // Add contextual indicator for AI responses
+        let contextualBadge = '';
+        if (sender === 'ai' && isContextual) {
+            contextualBadge = '<span style="font-size: 0.7rem; color: #64b5f6; margin-left: 8px;"><i class="fas fa-brain"></i> Contextual</span>';
+        }
+        // Add emotion badge for user messages (debug)
+        let emotionBadge = '';
+        if (sender === 'user' && emotion) {
+            emotionBadge = `<span style="font-size: 0.7rem; color: #ff4081; margin-left: 8px; background: rgba(255,64,129,0.08); border-radius: 8px; padding: 2px 6px;">[${emotion}]</span>`;
+        }
+        
+        messageEl.innerHTML = `${text}${contextualBadge}${emotionBadge}<div class="message-time">${time}</div>`;
+        chatMessages.appendChild(messageEl);
+
+        // Scroll to bottom with smooth animation
+        setTimeout(() => {
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
+    }
+
+function sendMessageToAI() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    // Add user message to chat immediately (with emotion)
+    addMessage(message, 'user', null, false, (isCameraOn && latestDetectedMood) ? latestDetectedMood : 'neutral');
+    chatHistory.push({ role: 'user', content: message });
+    messageInput.value = '';
+
+    // Show typing indicator
+    typingIndicator.style.display = 'block';
+
+    // Use the latest detected mood if camera is ON, otherwise 'neutral'
+    let detectedMood = (isCameraOn && latestDetectedMood) ? latestDetectedMood : 'neutral';
+
+    // Prepare enhanced data for backend with conversation memory
+    const data = {
+        message: message,
+        mood: detectedMood,
+        history: chatHistory.slice(-10), // Send last 10 messages for context
+        user_id: "{{ request.user.id }}", // Send user ID for conversation memory
+        use_internet_search: useInternetSearch // <-- NEW
+    };
+
+    // Get CSRF token
+    const csrftoken = getCookie('csrftoken');
+
+    // Send to Django backend
+    fetch('/chat/api/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Hide typing indicator
+        typingIndicator.style.display = 'none';
+        
+        // Add bot response to chat
+        if (data.response) {
+            // Check if this is a contextual response (has conversation history)
+            const isContextual = chatHistory.length > 2;
+            addMessage(data.response, 'ai', null, isContextual);
+            chatHistory.push({ role: 'ai', content: data.response });
+            
+            // Update conversation insights if available
+            if (data.conversation_summary) {
+                updateConversationInsights(data.conversation_summary);
+            }
+            
+            // Update enhanced features display
+            if (data.enhanced_features) {
+                updateEnhancedFeatures(data.enhanced_features);
+            }
+            
+            // Show feedback panel for AI responses
+            showFeedbackPanel(message, data.response);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        typingIndicator.style.display = 'none';
+        const errorMsg = "Sorry, I'm having trouble connecting. Please try again later.";
+        addMessage(errorMsg, 'ai');
+        chatHistory.push({ role: 'ai', content: errorMsg });
+    });
+}
+
+// Function to update conversation insights
+function updateConversationInsights(summary) {
+    const insightsPanel = document.getElementById('conversation-insights');
+    const topicsDisplay = document.getElementById('topics-display');
+    const contextIndicator = document.getElementById('context-indicator');
+    const memoryIndicator = document.getElementById('memory-indicator');
+    
+    if (summary && summary.total_exchanges > 1) {
+        // Show the insights panel
+        insightsPanel.style.display = 'block';
+        
+        // Show memory indicator in input field
+        memoryIndicator.style.opacity = '1';
+        
+        // Display current topics
+        if (summary.current_topics && summary.current_topics.length > 0) {
+            const topicIcons = {
+                'work': '💼',
+                'family': '👨‍👩‍👧‍👦',
+                'health': '🏥',
+                'relationships': '💕',
+                'school': '🎓',
+                'hobbies': '🎨',
+                'emotions': '😊'
+            };
+            
+            const topicsHtml = summary.current_topics.map(topic => {
+                const icon = topicIcons[topic] || '💬';
+                return `<span style="display: inline-block; margin-right: 8px; padding: 2px 6px; background: rgba(100,181,246,0.2); border-radius: 12px; font-size: 0.7rem;">${icon} ${topic}</span>`;
+            }).join('');
+            
+            topicsDisplay.innerHTML = `<strong>Topics:</strong> ${topicsHtml}`;
+        } else {
+            topicsDisplay.innerHTML = '<strong>Topics:</strong> General conversation';
+        }
+        
+        // Display context indicator
+        if (summary.total_exchanges > 5) {
+            contextIndicator.innerHTML = `<strong>Context:</strong> AI remembers ${summary.total_exchanges} exchanges with you`;
+        } else {
+            contextIndicator.innerHTML = `<strong>Context:</strong> Building conversation memory...`;
+        }
+        
+        // Add subtle animation
+        insightsPanel.style.animation = 'fadeIn 0.5s ease';
+    } else {
+        // Hide panel for new conversations
+        insightsPanel.style.display = 'none';
+        memoryIndicator.style.opacity = '0';
+    }
+}
+
+    // Initialize
+    function init() {
+        // Set up event listeners
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+        sendBtn.addEventListener('click', sendMessageToAI);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessageToAI();
+        });
+
+        // Feedback button listeners
+        document.getElementById('feedback-good').addEventListener('click', () => submitFeedback('good'));
+        document.getElementById('feedback-bad').addEventListener('click', () => submitFeedback('bad'));
+
+        // Consent actions
+        agreeBtn.addEventListener('click', () => {
+            consentModal.style.display = 'none';
+            cameraPlaceholder.innerHTML = '<div class="spinner"></div><p>Click "Start Camera" to begin</p>';
+        });
+
+        declineBtn.addEventListener('click', () => {
+            consentModal.style.display = 'none';
+            cameraPlaceholder.innerHTML = '<p>Camera access declined. You can enable it later in settings.</p>';
+        });
+        
+        // Initialize chat history with welcome message
+        chatHistory.push({
+            role: 'ai',
+            content: `Hi ${ "{{ user.username }}" }! I'm Emoticon, your AI emotional companion. 😊 How are you feeling today?`
+        });
+    }
+    
+    // Function to update enhanced features display
+    function updateEnhancedFeatures(features) {
+        const featuresPanel = document.getElementById('enhanced-features');
+        const searchIndicator = document.getElementById('search-indicator');
+        const learningIndicator = document.getElementById('learning-indicator');
+        
+        if (features) {
+            featuresPanel.style.display = 'block';
+            
+            // Show internet search status
+            if (features.internet_search_used) {
+                searchIndicator.innerHTML = '<i class="fas fa-search"></i> Internet search enabled';
+            } else {
+                searchIndicator.innerHTML = '<i class="fas fa-search"></i> Using local knowledge';
+            }
+            
+            // Show learning status
+            if (features.self_learning_active) {
+                learningIndicator.innerHTML = `<i class="fas fa-brain"></i> Learning active (${features.patterns_learned} patterns)`;
+            } else {
+                learningIndicator.innerHTML = '<i class="fas fa-brain"></i> Learning disabled';
+            }
+        } else {
+            featuresPanel.style.display = 'none';
+        }
+    }
+    
+    // Function to show feedback panel
+    function showFeedbackPanel(userMessage, aiResponse) {
+        const feedbackPanel = document.getElementById('feedback-panel');
+        feedbackPanel.style.display = 'block';
+        
+        // Store current message and response for feedback
+        feedbackPanel.dataset.userMessage = userMessage;
+        feedbackPanel.dataset.aiResponse = aiResponse;
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            feedbackPanel.style.display = 'none';
+        }, 10000);
+    }
+    
+    // Function to submit feedback
+    function submitFeedback(feedbackType) {
+        const feedbackPanel = document.getElementById('feedback-panel');
+        const userMessage = feedbackPanel.dataset.userMessage;
+        const aiResponse = feedbackPanel.dataset.aiResponse;
+        
+        if (!userMessage || !aiResponse) return;
+        
+        const feedback = feedbackType === 'good' ? 'That was helpful, thank you!' : 'I need more specific information';
+        
+        const data = {
+            message: userMessage,
+            response: aiResponse,
+            feedback: feedback
+        };
+        
+        const csrftoken = getCookie('csrftoken');
+        
+        fetch('/chat/feedback/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Feedback submitted:', data);
+            // Hide feedback panel
+            feedbackPanel.style.display = 'none';
+            
+            // Show feedback confirmation
+            const confirmation = document.createElement('div');
+            confirmation.style.cssText = 'position: fixed; top: 20px; right: 20px; background: rgba(76,175,80,0.9); color: white; padding: 10px; border-radius: 5px; z-index: 1000;';
+            confirmation.innerHTML = `<i class="fas fa-check"></i> Feedback received! AI is learning...`;
+            document.body.appendChild(confirmation);
+            
+            setTimeout(() => {
+                document.body.removeChild(confirmation);
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error submitting feedback:', error);
+        });
+    }
+
+    // Camera functions
+    function startCamera() {
+        if (isCameraOn) return;
+        
+        cameraPlaceholder.style.display = 'none';
+        videoFeed.style.display = 'block';
+        videoFeed.src = "{% url 'myapp:video_feed' %}";
+        
+        isCameraOn = true;
+        detectionActive = true;
+        console.log('Camera started successfully');
+        // Start polling
+        if (!moodPollInterval) {
+            pollMoodStatus(); // Optionally poll immediately
+            moodPollInterval = setInterval(pollMoodStatus, 1000);
+        }
+    }
+
+    function stopCamera() {
+        if (!isCameraOn) return;
+
+        isCameraOn = false;
+        detectionActive = false;
+
+        videoFeed.src = '';
+        videoFeed.style.display = 'none';
+        cameraPlaceholder.style.display = 'flex';
+        cameraPlaceholder.innerHTML = '<p>Camera stopped. Click "Start Camera" to begin again.</p>';
+        console.log('Camera stopped');
+        // Stop polling
+        if (moodPollInterval) {
+            clearInterval(moodPollInterval);
+            moodPollInterval = null;
+        }
+    }
+
+    // Mood status update logic
+    function updateMoodStatus(faceDetected, mood) {
+        const faceStatus = document.getElementById('face-status');
+        const moodStatus = document.getElementById('current-mood');
+        const dominantDisplay = document.getElementById('dominant-emotion-display');
+        if (!isCameraOn) {
+            faceStatus.textContent = 'No face detected';
+            moodStatus.textContent = '';
+            dominantDisplay.textContent = '';
+        } else if (!faceDetected) {
+            faceStatus.textContent = 'No face detected';
+            moodStatus.textContent = '';
+            dominantDisplay.textContent = '';
+        } else {
+            faceStatus.textContent = 'Face detected';
+            let moodEmoji = '';
+            switch (mood) {
+                case 'happy': moodEmoji = '😊'; break;
+                case 'sad': moodEmoji = '😢'; break;
+                case 'angry': moodEmoji = '😠'; break;
+                case 'surprise': moodEmoji = '😲'; break;
+                case 'fear': moodEmoji = '😨'; break;
+                case 'disgust': moodEmoji = '🤢'; break;
+                case 'neutral': moodEmoji = '😐'; break;
+                default: moodEmoji = '';
+            }
+            moodStatus.textContent = `Current Mood: ${mood ? mood.charAt(0).toUpperCase() + mood.slice(1) : ''}`;
+            dominantDisplay.textContent = moodEmoji;
+        }
+    }
+
+    // Poll /mood_status/ every second and update mood display and latestDetectedMood
+    function pollMoodStatus() {
+        fetch('/mood_status/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.mood && data.mood !== 'none') {
+                    updateMoodStatus(true, data.mood);
+                    latestDetectedMood = data.mood;
+                } else {
+                    updateMoodStatus(false);
+                    latestDetectedMood = 'neutral';
+                }
+            })
+            .catch(() => {
+                updateMoodStatus(false);
+                latestDetectedMood = 'neutral';
+            });
+    }
+
+    // Initialize on load
+    window.addEventListener('load', function() {
+        init();
+        // Scroll chat to bottom on page load
+        setTimeout(() => {
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 500);
+    });
+
+    // Modal accessibility and usability
+    (function() {
+        const modal = document.getElementById('consentModal');
+        const agreeBtn = document.getElementById('agreeBtn');
+        const declineBtn = document.getElementById('declineBtn');
+        let lastFocused = null;
+        function openModal() {
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+            lastFocused = document.activeElement;
+            setTimeout(() => agreeBtn.focus(), 100);
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            if (lastFocused) lastFocused.focus();
+            document.body.style.overflow = '';
+        }
+        // Trap focus inside modal
+        modal.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                const focusable = modal.querySelectorAll('button');
+                const first = focusable[0];
+                const last = focusable[focusable.length-1];
+                if (e.shiftKey && document.activeElement === first) {
+                    last.focus(); e.preventDefault();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    first.focus(); e.preventDefault();
+                }
+            }
+            if (e.key === 'Escape') closeModal();
+        });
+        // Click outside to close
+        modal.addEventListener('mousedown', function(e) {
+            if (e.target === modal) closeModal();
+        });
+        agreeBtn.addEventListener('click', closeModal);
+        declineBtn.addEventListener('click', closeModal);
+        // Show modal on load
+        openModal();
+    })();
+
+    document.getElementById('chat-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        sendMessageToAI();
+    });
+</script>
+</body>
+</html>
