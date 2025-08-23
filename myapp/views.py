@@ -28,6 +28,45 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 @require_http_methods(["POST"])
+def detect_emotion(request):
+    """Detect emotion from uploaded image frame"""
+    try:
+        data = json.loads(request.body)
+        image_data = data.get('image')
+        
+        if not image_data:
+            return JsonResponse({'error': 'No image data provided'}, status=400)
+            
+        # Remove the data URL prefix to get the base64 string
+        if ',' in image_data:
+            image_data = image_data.split(',')[1]
+        
+        # Convert base64 to image
+        image_bytes = base64.b64decode(image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Use our emotion detector
+        try:
+            emotion_detector = EmotionDetector()
+            emotion = emotion_detector.detect_emotion(frame)
+        except Exception as e:
+            logger.error(f"Emotion detection error: {str(e)}")
+            emotion = 'neutral'
+        
+        return JsonResponse({
+            'status': 'success',
+            'emotion': emotion
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f'Error in emotion detection: {str(e)}')
+        return JsonResponse({'error': 'Internal server error'}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def update_chatbot_context(request):
     """Update the chatbot's context with the current emotion"""
     try:
@@ -349,14 +388,17 @@ def mood_status_view(request):
     })
 
 # Camera and face detection imports
-from .backend.facedetection import EmotionDetector, get_current_mood, start_detection, stop_detection
-from deepface import DeepFace
+import cv2
 import numpy as np
+import base64
+from .emotion_detector import EmotionDetector
 import threading
 import time
 
 class VideoCamera:
     def __init__(self):
+        self.emotion = "neutral"
+        self.emotion_detector = EmotionDetector()
         try:
             # Initialize emotion detector from facedetection.py
             self.emotion_detector = EmotionDetector()
@@ -384,17 +426,31 @@ class VideoCamera:
             self.text_thickness = 2
             self.bg_color = (0, 0, 0)  # Black background for text
             
+            # Frame capture setup
+            self.frame = None
+            self.last_frame_time = 0
+            self.running = True
+            self.capture_thread = threading.Thread(target=self._capture_frames)
+            self.capture_thread.daemon = True
+            self.capture_thread.start()
+            
         except Exception as e:
             logger.error(f"Camera initialization error: {str(e)}")
             raise
         
-    def __del__(self):
-        self.running = False
-        if hasattr(self, 'capture_thread'):
+    def release(self):
+        """Releases camera resources and stops detection threads."""
+        if hasattr(self, 'running'):
+            self.running = False
+        if hasattr(self, 'capture_thread') and self.capture_thread.is_alive():
             self.capture_thread.join()
-        if hasattr(self, 'video'):
+        if hasattr(self, 'video') and self.video.isOpened():
             self.video.release()
+            logger.info("Camera released.")
         stop_detection()
+
+    def __del__(self):
+        self.release()
 
     def _capture_frames(self):
         """Background thread for continuous frame capture"""
@@ -515,16 +571,13 @@ def gen_frames(camera):
             frame = camera.get_frame()
             if frame is not None:
                 yield (b'--frame\r\n'
-                      b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
             else:
-                logger.warning("Empty frame received from camera")
-                # Add a small delay to prevent CPU overload on errors
-                from time import sleep
-                sleep(0.1)
-    except Exception as e:
-        logger.error(f"Frame generation error: {str(e)}")
-        # Clean up camera resource on error
-        camera.__del__()
+                logger.warning("Empty frame received from camera, stopping stream.")
+                break
+    finally:
+        logger.info("Client disconnected, releasing camera.")
+        camera.release()
 
 # Video feed endpoint
 @login_required

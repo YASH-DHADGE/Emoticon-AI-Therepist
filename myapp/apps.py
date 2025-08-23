@@ -5,4 +5,6 @@ class MyAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     
     def ready(self):
+        from . import utils
         from . import signals  # Import signals to register them
+        utils.load_model()

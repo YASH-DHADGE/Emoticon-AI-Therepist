@@ -1110,13 +1110,15 @@ function sendMessageToAI() {
     const message = messageInput.value.trim();
     if (!message) return;
 
-    // Add user message to chat immediately (with emotion)
-    addMessage(message, 'user', null, false, (isCameraOn && latestDetectedMood) ? latestDetectedMood : 'neutral');
-    chatHistory.push({ role: 'user', content: message });
+    // Sanitize and add user message to chat immediately (with emotion)
+    const sanitizedMessage = sanitizeInput(message);
+    addMessage(sanitizedMessage, 'user', null, false, (isCameraOn && latestDetectedMood) ? latestDetectedMood : 'neutral');
+    chatHistory.push({ role: 'user', content: sanitizedMessage });
     messageInput.value = '';
 
-    // Show typing indicator
+    // Show typing indicator and disable send button
     typingIndicator.style.display = 'block';
+    sendBtn.disabled = true;
 
     // Use the latest detected mood if camera is ON, otherwise 'neutral'
     let detectedMood = (isCameraOn && latestDetectedMood) ? latestDetectedMood : 'neutral';
@@ -1233,6 +1235,13 @@ function updateConversationInsights(summary) {
         memoryIndicator.style.opacity = '0';
     }
 }
+
+    // Sanitize user input
+    function sanitizeInput(input) {
+        const div = document.createElement('div');
+        div.textContent = input;
+        return div.innerHTML;
+    }
 
     // Initialize
     function init() {
@@ -1359,13 +1368,18 @@ function updateConversationInsights(summary) {
     function startCamera() {
         if (isCameraOn) return;
         
-        cameraPlaceholder.style.display = 'none';
-        videoFeed.style.display = 'block';
-        videoFeed.src = "{% url 'myapp:video_feed' %}";
-        
-        isCameraOn = true;
-        detectionActive = true;
-        console.log('Camera started successfully');
+        try {
+            cameraPlaceholder.style.display = 'none';
+            videoFeed.style.display = 'block';
+            videoFeed.src = "{% url 'myapp:video_feed' %}";
+            videoFeed.onerror = function() {
+                stopCamera();
+                cameraPlaceholder.innerHTML = '<p>Error accessing camera. Please try again.</p>';
+            };
+            
+            isCameraOn = true;
+            detectionActive = true;
+            console.log('Camera started successfully');
         // Start polling
         if (!moodPollInterval) {
             pollMoodStatus(); // Optionally poll immediately
@@ -1376,14 +1390,19 @@ function updateConversationInsights(summary) {
     function stopCamera() {
         if (!isCameraOn) return;
 
-        isCameraOn = false;
-        detectionActive = false;
+        try {
+            isCameraOn = false;
+            detectionActive = false;
 
-        videoFeed.src = '';
-        videoFeed.style.display = 'none';
-        cameraPlaceholder.style.display = 'flex';
-        cameraPlaceholder.innerHTML = '<p>Camera stopped. Click "Start Camera" to begin again.</p>';
-        console.log('Camera stopped');
+            videoFeed.src = '';
+            videoFeed.style.display = 'none';
+            cameraPlaceholder.style.display = 'flex';
+            cameraPlaceholder.innerHTML = '<p>Camera stopped. Click "Start Camera" to begin again.</p>';
+            console.log('Camera stopped');
+        } catch (error) {
+            console.error('Error stopping camera:', error);
+            cameraPlaceholder.innerHTML = '<p>Error occurred while stopping camera.</p>';
+        }
         // Stop polling
         if (moodPollInterval) {
             clearInterval(moodPollInterval);
@@ -1422,6 +1441,16 @@ function updateConversationInsights(summary) {
         }
     }
 
+    // Debounce mood polling to improve performance
+    function debouncePollMoodStatus() {
+        let timeout;
+        return function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(pollMoodStatus, 250);
+        }
+    }
+    const debouncedPollMood = debouncePollMoodStatus();
+
     // Poll /mood_status/ every second and update mood display and latestDetectedMood
     function pollMoodStatus() {
         fetch('/mood_status/')
@@ -1441,9 +1470,22 @@ function updateConversationInsights(summary) {
             });
     }
 
+    // Add accessibility enhancements
+    function enhanceAccessibility() {
+        const messageInput = document.getElementById('messageInput');
+        messageInput.setAttribute('aria-label', 'Type your message');
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessageToAI();
+            }
+        });
+    }
+
     // Initialize on load
     window.addEventListener('load', function() {
         init();
+        enhanceAccessibility();
         // Scroll chat to bottom on page load
         setTimeout(() => {
             chatMessages.scrollTo({

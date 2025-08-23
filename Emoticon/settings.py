@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-deve
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Defaults to False. Set to 'True' in your .env file for local development.
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
 # Define allowed hosts from an environment variable, split by comma
 # Example: ALLOWED_HOSTS=localhost,127.0.0.1,.onrender.com
@@ -216,4 +216,3 @@ LOGGING = {
 }
 
 # Note: Authentication settings are already defined above
-
